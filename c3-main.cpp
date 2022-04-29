@@ -203,13 +203,16 @@ int main(){
 			// Filter scan using voxel filter
 			pcl::VoxelGrid<PointT> vg;
             vg.setInputCloud(scanCloud);
-            double filterRes = 0.25;
+            double filterRes = 0.5;
             vg.setLeafSize(filterRes, filterRes, filterRes);
             typename pcl::PointCloud<PointT>::Ptr filteredCloud (new pcl::PointCloud<PointT>);
             vg.filter(*filteredCloud);
-
+            pose = Pose(Point(vehicle->GetTransform().location.x, vehicle->GetTransform().location.y
+            ,vehicle->GetTransform().location.z), Rotate(vehicle->GetTransform().rotation.yaw * pi/180
+            , vehicle->GetTransform().rotation.pitch * pi/180, vehicle->GetTransform().rotation.roll
+            * pi/180)) - poseRef;
 			// Find pose transform by using ICP or NDT matching
-			Eigen::Matrix4d pos_transform = ICP(mapCloud, filteredCloud, pose, 5);
+			Eigen::Matrix4d pos_transform = ICP(mapCloud, filteredCloud, pose, 0);
 			pose = getPose(pos_transform);
 
 			// Transform scan so it aligns with ego's actual pose and render that scan
